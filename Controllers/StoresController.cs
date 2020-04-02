@@ -34,16 +34,16 @@ namespace WebApi.Controllers
             _appSettings = appSettings.Value;
         }
 
-        // GET: api/<CityController>
+        // GET: api/<StoresController>
         [HttpGet]
         public IActionResult Get()
         {
-            var city = _storeService.GetAll();
-            var model = _mapper.Map<IList<StoresModel>>(city);
+            var result = _storeService.GetAll();
+            var model = _mapper.Map<IList<StoresModel>>(result);
             return Ok(model);
         }
 
-        // POST api/<CityController>
+        // POST api/<StoresController>
         [HttpPost("Register")]
         public IActionResult Post([FromBody]RegisterStoreModel model)
         {
@@ -52,9 +52,9 @@ namespace WebApi.Controllers
             var user = Utilities.getUserId(User);
             try
             {
-                // create city
+                // create store
                 var result = _storeService.Create(stores, user);
-                return Ok(result);
+                return Ok(_mapper.Map<IList<StoresModel>>(result));
             }
             catch (AppException ex)
             {
@@ -63,18 +63,18 @@ namespace WebApi.Controllers
             }
         }
 
-        // PUT api/<CityController>/5
+        // PUT api/<StoresController>/5
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody]RegisterStoreModel model)
+        public IActionResult Update(int id, [FromBody]storeUpdateModel model)
         {
             var stores = _mapper.Map<Stores>(model);
             stores.Id = id;
 
             try
             {
-                // update city
-                _storeService.Update(stores);
-                return Ok();
+                // update store
+                var store = _storeService.Update(stores);
+                return Ok(_mapper.Map<StoresModel>(store));
             }
             catch (AppException ex)
             {
@@ -84,13 +84,13 @@ namespace WebApi.Controllers
 
         }
 
-        // DELETE api/<CityController>/5
+        // DELETE api/<StoresController>/5
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             try
             {
-                // delete city
+                // delete store
                 _storeService.Delete(id);
                 return Ok();
             }
@@ -106,8 +106,8 @@ namespace WebApi.Controllers
         {
             try
             {
-                var user = _storeService.GetById(id);
-                var model = _mapper.Map<StoresModel>(user);
+                var result = _storeService.GetById(id);
+                var model = _mapper.Map<StoresModel>(result);
                 return Ok(model);
             }
             catch (Exception ex)

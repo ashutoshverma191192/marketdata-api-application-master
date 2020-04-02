@@ -1,62 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
-using System.IdentityModel.Tokens.Jwt;
-using WebApi.Helpers;
-using Microsoft.Extensions.Options;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using WebApi.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using WebApi.Entities;
-using WebApi.Models.City;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using WebApi.Helpers;
+using WebApi.Models.SubGroups;
+using WebApi.Services;
 
 namespace WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("city")]
-    public class CityController : ControllerBase
+    [Route("subGroups")]
+    public class subGroupController : ControllerBase
     {
-        private ICityService _cityService;
+        private ISubGroupsService _subGroupService;
         private IMapper _mapper;
         private readonly AppSettings _appSettings;
 
-        public CityController(
-            ICityService cityService,
+        public subGroupController(
+            ISubGroupsService subGroupService,
             IMapper mapper,
             IOptions<AppSettings> appSettings)
         {
-            _cityService = cityService;
+            _subGroupService = subGroupService;
             _mapper = mapper;
             _appSettings = appSettings.Value;
         }
-        
-        // GET: api/<CityController>
+
+        // GET: api/<subGroupController>
         [HttpGet]
         public IActionResult Get()
         {
-            var city = _cityService.GetAll();
-            var model = _mapper.Map<IList<CityModel>>(city);
+            var result = _subGroupService.GetAll();
+            var model = _mapper.Map<IList<SubGroupModel>>(result);
             return Ok(model);
         }
 
-        // POST api/<CityController>
-        [AllowAnonymous]
+        // POST api/<subGroupController>
         [HttpPost("Register")]
-        public IActionResult Post([FromBody]RegisterCityModel model)
+        public IActionResult Post([FromBody]RegisterSubGroupModel model)
         {
             // map model to entity
-            var cityMasters = _mapper.Map<CityMasters>(model);
+            var subGroups = _mapper.Map<SubGroups>(model);
+            var user = Utilities.getUserId(User);
             try
             {
-                // create city
-                var result = _cityService.Create(cityMasters);
-                return Ok(_mapper.Map<CityModel>(result));
+                // create SubGroups
+                var result = _subGroupService.Create(subGroups, user);
+                return Ok(_mapper.Map<SubGroupModel>(result));
             }
             catch (AppException ex)
             {
@@ -65,18 +62,19 @@ namespace WebApi.Controllers
             }
         }
 
-        // PUT api/<CityController>/5
+        // PUT api/<subGroupController>/5
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody]RegisterCityModel model)
+        public IActionResult Update(int id, [FromBody]subGroupUpdateModel model)
         {
-            var cityMaster = _mapper.Map<CityMasters>(model);
-            cityMaster.Id = id;
+            var subGroups = _mapper.Map<SubGroups>(model);
+            var user = Utilities.getUserId(User);
+            subGroups.Id = id;
 
             try
             {
-                // update city
-                var result = _cityService.Update(cityMaster);
-                return Ok( _mapper.Map<CityModel>(result));
+                // update SubGroups
+                var subgroup = _subGroupService.Update(subGroups, user);
+                return Ok(_mapper.Map<SubGroupModel>(subgroup));
             }
             catch (AppException ex)
             {
@@ -86,14 +84,14 @@ namespace WebApi.Controllers
 
         }
 
-        // DELETE api/<CityController>/5
+        // DELETE api/<subGroupController>/5
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             try
             {
-                // delete city
-                _cityService.Delete(id);
+                // delete SubGroups
+                _subGroupService.Delete(id);
                 return Ok();
             }
             catch (AppException ex)
@@ -108,8 +106,8 @@ namespace WebApi.Controllers
         {
             try
             {
-                var result = _cityService.GetById(id);
-                var model = _mapper.Map<CityModel>(result);
+                var result = _subGroupService.GetById(id);
+                var model = _mapper.Map<SubGroupModel>(result);
                 return Ok(model);
             }
             catch (Exception ex)

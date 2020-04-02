@@ -12,7 +12,7 @@ namespace WebApi.Services
         IEnumerable<CityMasters> GetAll();
         CityMasters GetById(int id);
         CityMasters Create(CityMasters cityMasters);
-        void  Update(CityMasters cityMasters);
+        CityMasters Update(CityMasters cityMasters);
         void Delete(int id);
     }
     public class CityService : ICityService
@@ -59,14 +59,14 @@ namespace WebApi.Services
             return city;
         }
 
-        public void Update(CityMasters cityMasters)
+        public CityMasters Update(CityMasters cityMasters)
         {
             var city = _context.CityMasters.Find(cityMasters.Id);
 
             if (city == null)
                 throw new AppException("city not found");
 
-            // update username if it has changed
+            // update City name if it has changed
             if (!string.IsNullOrWhiteSpace(cityMasters.Name) && cityMasters.Name != city.Name)
             {
                 // throw error if the new city name is already taken
@@ -78,6 +78,8 @@ namespace WebApi.Services
 
             _context.CityMasters.Update(city);
             _context.SaveChanges();
+
+            return city;
         }
     }
 }

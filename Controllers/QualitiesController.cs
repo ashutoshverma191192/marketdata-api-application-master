@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
-using System.IdentityModel.Tokens.Jwt;
-using WebApi.Helpers;
-using Microsoft.Extensions.Options;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using WebApi.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using WebApi.Entities;
-using WebApi.Models.City;
+using WebApi.Helpers;
+using WebApi.Models.Qualities;
+using WebApi.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,44 +17,44 @@ namespace WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("city")]
-    public class CityController : ControllerBase
+    [Route("qualities")]
+    public class QualitiesController : ControllerBase
     {
-        private ICityService _cityService;
+        private IQualitiesService _qualitiesService;
         private IMapper _mapper;
         private readonly AppSettings _appSettings;
 
-        public CityController(
-            ICityService cityService,
+        public QualitiesController(
+            IQualitiesService qualitiesService,
             IMapper mapper,
             IOptions<AppSettings> appSettings)
         {
-            _cityService = cityService;
+            _qualitiesService = qualitiesService;
             _mapper = mapper;
             _appSettings = appSettings.Value;
         }
-        
-        // GET: api/<CityController>
+
+        // GET: api/<QualitiesController>
         [HttpGet]
         public IActionResult Get()
         {
-            var city = _cityService.GetAll();
-            var model = _mapper.Map<IList<CityModel>>(city);
+            var result = _qualitiesService.GetAll();
+            var model = _mapper.Map<IList<QualitiesModel>>(result);
             return Ok(model);
         }
 
-        // POST api/<CityController>
-        [AllowAnonymous]
+        // POST api/<QualitiesController>
         [HttpPost("Register")]
-        public IActionResult Post([FromBody]RegisterCityModel model)
+        public IActionResult Post([FromBody]RegisterQualitiesModel model)
         {
             // map model to entity
-            var cityMasters = _mapper.Map<CityMasters>(model);
+            var qualities = _mapper.Map<Qualities>(model);
+            var user = Utilities.getUserId(User);
             try
             {
-                // create city
-                var result = _cityService.Create(cityMasters);
-                return Ok(_mapper.Map<CityModel>(result));
+                // create qualities
+                var result = _qualitiesService.Create(qualities, user);
+                return Ok(_mapper.Map<QualitiesModel>(result));
             }
             catch (AppException ex)
             {
@@ -65,18 +63,19 @@ namespace WebApi.Controllers
             }
         }
 
-        // PUT api/<CityController>/5
+        // PUT api/<QualitiesController>/5
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody]RegisterCityModel model)
+        public IActionResult Update(int id, [FromBody]QualitiesUpdateModel model)
         {
-            var cityMaster = _mapper.Map<CityMasters>(model);
-            cityMaster.Id = id;
+            var qualities = _mapper.Map<Qualities>(model);
+            var user = Utilities.getUserId(User);
+            qualities.Id = id;
 
             try
             {
-                // update city
-                var result = _cityService.Update(cityMaster);
-                return Ok( _mapper.Map<CityModel>(result));
+                // update Qualities
+                var result = _qualitiesService.Update(qualities, user);
+                return Ok(_mapper.Map<QualitiesModel>(result));
             }
             catch (AppException ex)
             {
@@ -86,14 +85,14 @@ namespace WebApi.Controllers
 
         }
 
-        // DELETE api/<CityController>/5
+        // DELETE api/<QualitiesController>/5
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             try
             {
-                // delete city
-                _cityService.Delete(id);
+                // delete Qualities
+                _qualitiesService.Delete(id);
                 return Ok();
             }
             catch (AppException ex)
@@ -108,8 +107,8 @@ namespace WebApi.Controllers
         {
             try
             {
-                var result = _cityService.GetById(id);
-                var model = _mapper.Map<CityModel>(result);
+                var result = _qualitiesService.GetById(id);
+                var model = _mapper.Map<QualitiesModel>(result);
                 return Ok(model);
             }
             catch (Exception ex)

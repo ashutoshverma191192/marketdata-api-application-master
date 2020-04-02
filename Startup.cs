@@ -84,6 +84,10 @@ namespace WebApi
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICityService, CityService>();
             services.AddScoped<IStoreService, StoresService>();
+            services.AddScoped<IGroupService, GroupService>();
+            services.AddScoped<ISubGroupsService, SubGroupService>();
+            services.AddScoped<IItemService, ItemService>();
+            services.AddScoped<IQualitiesService, QualitiesService>();
 
              // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
